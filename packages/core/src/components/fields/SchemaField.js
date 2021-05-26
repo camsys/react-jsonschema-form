@@ -144,8 +144,8 @@ function DefaultTemplate(props) {
   return (
     <WrapIfAdditional {...props}>
       {displayLabel && <Label label={label} required={required} id={id} />}
-      {displayLabel && description ? description : null}
       {children}
+      {displayLabel && description ? description : null}
       {errors}
       {help}
     </WrapIfAdditional>
