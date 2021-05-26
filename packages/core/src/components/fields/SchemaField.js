@@ -104,7 +104,7 @@ function Help(props) {
 }
 
 function ErrorList(props) {
-  const { errors = [] } = props;
+  const { errors = [], label } = props;
   if (errors.length === 0) {
     return null;
   }
@@ -117,7 +117,7 @@ function ErrorList(props) {
           .map((error, index) => {
             return (
               <li className="text-danger" key={index}>
-                {error}
+                {label} {error}
               </li>
             );
           })}
@@ -326,7 +326,7 @@ function SchemaFieldRender(props) {
     rawDescription: description,
     help: <Help id={id + "__help"} help={help} />,
     rawHelp: typeof help === "string" ? help : undefined,
-    errors: <ErrorList errors={errors} />,
+    errors: <ErrorList errors={errors} label={label} />,
     rawErrors: errors,
     id,
     label,
