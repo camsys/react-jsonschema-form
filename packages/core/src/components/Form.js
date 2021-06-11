@@ -486,7 +486,7 @@ export default class Form extends Component {
         {children ? (
           children
         ) : (
-          <div class="submit">
+          <div className="submit">
             <button type="submit" className="btn btn-primary" disabled={disabled}>
               Submit
             </button>
