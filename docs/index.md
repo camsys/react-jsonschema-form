@@ -16,15 +16,16 @@ react-jsonschema-form also comes with tools such as `uiSchema` and other form pr
 
 ## Installation
 
-First install the dependency from npm:
+First install the dependencies from npm, along with a validator implementation (such as `@rjsf/validator-ajv8`):
 
 ```bash
-$ npm install @rjsf/core --save
+$ npm install @rjsf/core @rjsf/utils @rjsf/validator-ajv8 --save
 ```
 
-Then import the dependency as follows:
+Then import the dependencies as follows:
 
 ```js
+import validator from "@rjsf/validator-ajv8";
 import Form from "@rjsf/core";
 ```
 
@@ -33,12 +34,12 @@ Our latest version requires React 16+. You can also install `react-jsonschema-fo
 ### As a script served from a CDN
 
 ```html
-  <script src="https://unpkg.com/@rjsf/core/dist/react-jsonschema-form.js"></script>
+  <script src="https://unpkg.com/@rjsf/core/dist/core.cjs.production.min.js"></script>
 ```
 
-Source maps are available at [this url](https://unpkg.com/@rjsf/core/dist/react-jsonschema-form.js.map).
+Source maps are available at [this url](https://unpkg.com/@rjsf/core/dist/core.cjs.production.min.js.map).
 
-> Note: The CDN version **does not** embed `react` or `react-dom`.
+> Note: The CDN version **does not** embed `react` or `react-dom`. If you want other distributions (i.e. umd, esm), look [here](https://unpkg.com/@rjsf/core/dist/) for all releases
 
 You'll also need to alias the default export property to use the Form component:
 
@@ -50,8 +51,11 @@ const {default: Form} = JSONSchemaForm;
 
 ## Usage
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   title: "Todo",
   type: "object",
   required: ["title"],
@@ -65,6 +69,7 @@ const log = (type) => console.log.bind(console, type);
 
 render((
   <Form schema={schema}
+        validator={validator}
         onChange={log("changed")}
         onSubmit={log("submitted")}
         onError={log("errors")} />
@@ -108,3 +113,9 @@ Apache 2
 |  <img style="height: 100px !important" src="https://avatars1.githubusercontent.com/u/1066228?s=200&v=4"> |  <img style="height: 100px !important" src="https://user-images.githubusercontent.com/1689183/51487090-4ea04f80-1d57-11e9-9a91-79b7ef8d2013.png"></a> | <img style="height: 100px !important" src="https://www.netlify.com/img/global/badges/netlify-color-accent.svg" />  |
 |---|---|---|
 |This project initially started as a [mozilla-services](https://github.com/mozilla-services) project. |Testing is powered by [BrowserStack](https://www.browserstack.com/).|Deploy Previews are provided by [Netlify](https://www.netlify.com).|
+
+## Who uses react-jsonschema-form?
+
+- ...
+
+Add your own company / organization by making a [pull request](https://github.com/rjsf-team/react-jsonschema-form/pulls).

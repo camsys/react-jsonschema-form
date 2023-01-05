@@ -1,40 +1,40 @@
 import React from "react";
-import { FieldTemplateProps } from "@rjsf/core";
-import { Text, Label } from "@fluentui/react";
-import { List } from "@fluentui/react";
+import { FieldTemplateProps, getTemplate, getUiOptions } from "@rjsf/utils";
+import { Text } from "@fluentui/react";
 
-const styles = {
-  root: [
-    {
-      fontSize: 24,
-    },
-  ],
-};
-
-const FieldTemplate = ({
-  id,
-  children,
-  displayLabel,
-  rawErrors = [],
-  rawHelp,
-  rawDescription,
-  classNames,
-  label,
-  required
-}: FieldTemplateProps) => {
+const FieldTemplate = (props: FieldTemplateProps) => {
+  const {
+    id,
+    children,
+    errors,
+    help,
+    rawDescription,
+    hidden,
+    uiSchema,
+    registry,
+  } = props;
+  const uiOptions = getUiOptions(uiSchema);
+  const WrapIfAdditionalTemplate = getTemplate<"WrapIfAdditionalTemplate">(
+    "WrapIfAdditionalTemplate",
+    registry,
+    uiOptions
+  );
   // TODO: do this better by not returning the form-group class from master.
+  let { classNames = "" } = props;
   classNames = "ms-Grid-col ms-sm12 " + classNames.replace("form-group", "");
   return (
-    <div className={classNames} style={{marginBottom: 15}}>
-      {children}
-      {/* {displayLabel && <Label>
-        {label}
-        {required && <span style={{color: "rgb(164, 38, 44)", fontSize: "12px", fontWeight: "normal"}}>*</span>}
-      </Label>} */}
-      {rawDescription && <Text>{rawDescription}</Text>}
-      {rawErrors.length > 0 && <List items={rawErrors} />}
-      {rawHelp && <Text id={id}>{rawHelp}</Text>}
-    </div>
+    <WrapIfAdditionalTemplate {...props}>
+      <div
+        id={id}
+        className={classNames}
+        style={{ marginBottom: 15, display: hidden ? "none" : undefined }}
+      >
+        {children}
+        {rawDescription && <Text>{rawDescription}</Text>}
+        {errors}
+        {help}
+      </div>
+    </WrapIfAdditionalTemplate>
   );
 };
 

@@ -9,17 +9,20 @@ The API allows to specify your own custom *widget* and *field* components:
 
 You can override any default field and widget, including the internal widgets like the `CheckboxWidget` that `ObjectField` renders for boolean values. You can override any field and widget just by providing the customized fields/widgets in the `fields` and `widgets` props:
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema, UiSchema, WidgetProps, RegistryWidgetsType } from "@rjsf/utils";
+import validator from '@rjsf/validator-ajv8';
+
+const schema: RJSFSchema = {
   type: "boolean",
   default: true
 };
 
-const uiSchema = {
+const uiSchema: UiSchema = {
   "ui:widget": "checkbox"
 };
 
-const CustomCheckbox = function(props) {
+const CustomCheckbox = function(props: WidgetProps) {
   return (
     <button id="custom" className={props.value ? "checked" : "unchecked"} onClick={() => props.onChange(!props.value)}>
     	{String(props.value)}
@@ -27,24 +30,25 @@ const CustomCheckbox = function(props) {
   );
 };
 
-const widgets = {
+const widgets: RegistryWidgetsType = {
   CheckboxWidget: CustomCheckbox
 };
 
 render((
-  <Form schema={schema}
-        uiSchema={uiSchema}
-        widgets={widgets} />
+  <Form schema={schema} uiSchema={uiSchema} validator={validator} widgets={widgets} />
 ), document.getElementById("app"));
 ```
 
 This allows you to create a reusable customized form class with your custom fields and widgets:
 
-```jsx
-const customFields = {StringField: CustomString};
-const customWidgets = {CheckboxWidget: CustomCheckbox};
+```tsx
+import { RegistryFieldsType, RegistryWidgetsType } from "@rjsf/utils";
+import { FormProps } from "@rjsf/core";
 
-function MyForm(props) {
+const customFields: RegistryWidgetsType = {StringField: CustomString};
+const customWidgets: RegistryFieldsType = {CheckboxWidget: CustomCheckbox};
+
+function MyForm(props: FormProps) {
   return <Form fields={customFields} widgets={customWidgets} {...props} />;
 }
 ```
@@ -52,6 +56,7 @@ function MyForm(props) {
 The default fields you can override are:
 
  - `ArrayField`
+ - `ArraySchemaField`
  - `BooleanField`
  - `DescriptionField`
  - `OneOfField`
@@ -94,14 +99,18 @@ You can provide your own custom widgets to a uiSchema for the following json dat
 - `number`
 - `integer`
 - `boolean`
+- `array`
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema, UiSchema, WidgetProps } from "@rjsf/utils";
+import validator from '@rjsf/validator-ajv8';
+
+const schema: Schema = {
   type: "string"
 };
 
-const uiSchema = {
-  "ui:widget": (props) => {
+const uiSchema: UiSchema = {
+  "ui:widget": (props: WidgetProps) => {
     return (
       <input type="text"
         className="custom"
@@ -113,37 +122,42 @@ const uiSchema = {
 };
 
 render((
-  <Form schema={schema}
-        uiSchema={uiSchema} />
+  <Form schema={schema} uiSchema={uiSchema} validator={validator} />
 ), document.getElementById("app"));
 ```
 
 The following props are passed to custom widget components:
 
-- `id`: The generated id for this field;
-- `schema`: The JSONSchema subschema object for this field;
-- `uiSchema`: The uiSchema for this field;
-- `value`: The current value for this field;
-- `placeholder`: the placeholder for the field, if any;
-- `required`: The required status of this field;
-- `disabled`: `true` if the widget is disabled;
-- `readonly`: `true` if the widget is read-only;
-- `autofocus`: `true` if the widget should autofocus;
+- `id`: The generated id for this widget;
+- `schema`: The JSONSchema subschema object for this widget;
+- `uiSchema`: The uiSchema for this widget;
+- `value`: The current value for this widget;
+- `placeholder`: The placeholder for the widget, if any;
+- `required`: The required status of this widget;
+- `disabled`: A boolean value stating if the widget is disabled;
+- `readonly`: A boolean value stating if the widget is read-only;
+- `autofocus`: A boolean value stating if the widget should autofocus;
+- `label`: The computed label for this widget, as a string
+- `multiple`: A boolean value stating if the widget can accept multiple values;
 - `onChange`: The value change event handler; call it with the new value every time it changes;
 - `onKeyChange`: The key change event handler (only called for fields with `additionalProperties`); pass the new value every time it changes;
-- `onBlur`: The input blur event handler; call it with the the widget id and value;
-- `onFocus`: The input focus event handler; call it with the the widget id and value;
+- `onBlur`: The input blur event handler; call it with the widget id and value;
+- `onFocus`: The input focus event handler; call it with the widget id and value;
 - `options`: A map of options passed as a prop to the component (see [Custom widget options](#custom-widget-options)).
 - `options.enumOptions`: For enum fields, this property contains the list of options for the enum as an array of { label, value } objects. If the enum is defined using the oneOf/anyOf syntax, the entire schema object for each option is appended onto the { schema, label, value } object.
-- `formContext`: The `formContext` object that you passed to Form.
+- `formContext`: The `formContext` object that you passed to `Form`.
 - `rawErrors`: An array of strings listing all generated error messages from encountered errors for this widget.
+ - `registry`: A [registry](#the-registry-object) object (read next).
 
 ### Custom component registration
 
 Alternatively, you can register them all at once by passing the `widgets` prop to the `Form` component, and reference their identifier from the `uiSchema`:
 
-```jsx
-const MyCustomWidget = (props) => {
+```tsx
+import { RJSFSchema, UiSchema, WidgetProps, RegistryWidgetsType } from "@rjsf/utils";
+import validator from '@rjsf/validator-ajv8';
+
+const MyCustomWidget = (props: WidgetProps) => {
   return (
     <input type="text"
       className="custom"
@@ -153,23 +167,20 @@ const MyCustomWidget = (props) => {
   );
 };
 
-const widgets = {
+const widgets: RegistryWidgetsType = {
   myCustomWidget: MyCustomWidget
 };
 
-const schema = {
+const schema: RJSFSchema = {
   type: "string"
 };
 
-const uiSchema = {
+const uiSchema: UiSchema = {
   "ui:widget": "myCustomWidget"
 }
 
 render((
-  <Form
-    schema={schema}
-    uiSchema={uiSchema}
-    widgets={widgets} />
+  <Form schema={schema} uiSchema={uiSchema} validator={validator} widgets={widgets} />
 ), document.getElementById("app"));
 ```
 
@@ -179,12 +190,15 @@ This is useful if you expose the `uiSchema` as pure JSON, which can't carry func
 
 If you need to pass options to your custom widget, you can add a `ui:options` object containing those properties. If the widget has `defaultProps`, the options will be merged with the (optional) options object from `defaultProps`:
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema, UiSchema, WidgetProps } from "@rjsf/utils";
+import validator from '@rjsf/validator-ajv8';
+
+const schema: RJSFSchema = {
   type: "string"
 };
 
-function MyCustomWidget(props) {
+function MyCustomWidget(props: WidgetProps) {
   const {options} = props;
   const {color, backgroundColor} = options;
   return <input style={{color, backgroundColor}} />;
@@ -196,7 +210,7 @@ MyCustomWidget.defaultProps = {
   }
 };
 
-const uiSchema = {
+const uiSchema: UiSchema = {
   "ui:widget": MyCustomWidget,
   "ui:options": {
     backgroundColor: "yellow"
@@ -205,8 +219,7 @@ const uiSchema = {
 
 // renders red on yellow input
 render((
-  <Form schema={schema}
-        uiSchema={uiSchema} />
+  <Form schema={schema} uiSchema={uiSchema} validator={validator} />
 ), document.getElementById("app"));
 ```
 
@@ -214,9 +227,9 @@ render((
 
 > Note: Since v0.41.0, the `ui:widget` object API, where a widget and options were specified with `"ui:widget": {component, options}` shape, is deprecated. It will be removed in a future release.
 
-### Customizing widgets text input
+### Customizing widgets' text input
 
-All the widgets that render a text input use the `BaseInput` component internally. If you need to customize all text inputs without customizing all widgets individually, you can provide a `BaseInput` component in the `widgets` property of `Form` (see [Custom component registration](#custom-component-registration)).
+All the widgets that render a text input use the `BaseInputTemplate` component internally. If you need to customize all text inputs without customizing all widgets individually, you can provide a `BaseInputTemplate` component in the `templates` property of `Form` (see [Custom Templates](advanced-customization/custom-templates#baseinputtemplate)).
 
 ## Custom field components
 
@@ -224,8 +237,11 @@ You can provide your own field components to a uiSchema for basically any json s
 
 For example, let's create and register a dumb `geo` component handling a *latitude* and a *longitude*:
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema, UiSchema, FieldProps, RegistryFieldsType } from "@rjsf/utils";
+import validator from '@rjsf/validator-ajv8';
+
+const schema: RJSFSchema = {
   type: "object",
   required: ["lat", "lon"],
   properties: {
@@ -235,8 +251,8 @@ const schema = {
 };
 
 // Define a custom component for handling the root position object
-class GeoPosition extends React.Component {
-  constructor(props) {
+class GeoPosition extends React.Component<FieldProps> {
+  constructor(props: FieldProps) {
     super(props);
     this.state = {...props.formData};
   }
@@ -261,19 +277,16 @@ class GeoPosition extends React.Component {
 }
 
 // Define the custom field component to use for the root object
-const uiSchema = {"ui:field": "geo"};
+const uiSchema: UiSchema = {"ui:field": "geo"};
 
 // Define the custom field components to register; here our "geo"
 // custom field component
-const fields = {geo: GeoPosition};
+const fields: RegistryFieldsType = {geo: GeoPosition};
 
 // Render the form with all the properties we just defined passed
 // as props
 render((
-  <Form
-    schema={schema}
-    uiSchema={uiSchema}
-    fields={fields} />
+  <Form schema={schema} uiSchema={uiSchema} validator={validator} fields={fields} />
 ), document.getElementById("app"));
 ```
 
@@ -283,25 +296,33 @@ render((
 
 A field component will always be passed the following props:
 
- - `schema`: The JSON schema for this field;
+ - `schema`: The JSON subschema object for this field;
  - `uiSchema`: The [uiSchema](#the-uischema-object) for this field;
  - `idSchema`: The tree of unique ids for every child field;
  - `formData`: The data for this field;
  - `errorSchema`: The tree of errors for this field and its children;
  - `registry`: A [registry](#the-registry-object) object (read next).
  - `formContext`: A [formContext](#the-formcontext-object) object (read next).
+ - `required`: The required status of this field;
+ - `disabled`: A boolean value stating if the field is disabled;
+ - `readonly`: A boolean value stating if the field is read-only;
+ - `autofocus`: A boolean value stating if the field should autofocus;
+ - `name`: The unique name of the field, usually derived from the name of the property in the JSONSchema
+ - `onChange`: The field change event handler; called with the updated form data and an optional `ErrorSchema`
+ - `onBlur`: The input blur event handler; call it with the field id and value;
+ - `onFocus`: The input focus event handler; call it with the field id and value;
 
 ## The `registry` object
 
-The `registry` is an object containing the registered custom fields and widgets as well as the root schema definitions.
+The `registry` is an object containing the registered core, theme and custom fields and widgets as well as the root schema, form context, schema utils.
 
- - `fields`: The [custom registered fields](#custom-field-components). By default this object contains the standard `SchemaField`, `TitleField` and `DescriptionField` components;
- - `widgets`: The [custom registered widgets](#custom-widget-components), if any;
- - `rootSchema`: The root schema, which can contain referenced [definitions](#schema-definitions-and-references);
- - `formContext`: The [formContext](#the-formcontext-object) object;
- - `definitions` (deprecated since v2): Equal to `rootSchema.definitions`.
+ - `fields`: The set of all fields used by the `Form`. Includes fields from `core`, theme-specific fields and any [custom registered fields](#custom-field-components);
+ - `widgets`: The set of all widgets used by the `Form`. Includes widgets from `core`, theme-specific widgets and any [custom registered widgets](#custom-widget-components), if any;
+ - `rootSchema`: The root schema, as passed to the `Form`, which can contain referenced [definitions](#schema-definitions-and-references);
+ - `formContext`: The [formContext](#the-formcontext-object) that was passed to `Form`;
+ - `schemaUtils`: The current implementation of the `SchemaUtilsType` (from `@rjsf/utils`) in use by the `Form`.  Used to call any of the validation-schema-based utility functions.
 
-The registry is passed down the component tree, so you can access it from your custom field and `SchemaField` components.
+The registry is passed down the component tree, so you can access it from your custom field, custom widget, custom template and `SchemaField` components.
 
 ### Custom SchemaField
 
@@ -311,9 +332,11 @@ You can provide your own implementation of the `SchemaField` base React componen
 
 To proceed so, pass a `fields` object having a `SchemaField` property to your `Form` component; here's an example:
 
-```jsx
+```tsx
+import { RJSFSchema, FieldProps, RegistryFieldsType } from "@rjsf/utils";
+import validator from '@rjsf/validator-ajv8';
 
-const CustomSchemaField = function(props) {
+const CustomSchemaField = function(props: FieldProps) {
   return (
     <div id="custom">
       <p>Yeah, I'm pretty dumb.</p>
@@ -322,20 +345,49 @@ const CustomSchemaField = function(props) {
   );
 };
 
-const fields = {
+const fields: RegistryFieldsType = {
   SchemaField: CustomSchemaField
 };
 
-const schema = {
+const schema: RJSFSchema = {
   type: "string"
 };
 
 render((
-  <Form schema={schema}
-        fields={fields} />
+  <Form schema={schema} validator={validator} fields={fields} />
 ), document.getElementById("app"));
 ```
 
 If you're curious how this could ever be useful, have a look at the [Kinto formbuilder](https://github.com/Kinto/formbuilder) repository to see how it's used to provide editing capabilities to any form field.
 
 Props passed to a custom SchemaField are the same as [the ones passed to a custom field](#field-props).
+
+### Custom ArraySchemaField
+
+Everything that was mentioned above for a `Custom SchemaField` applies, but this is only used to render the Array item `children` that are then passed to the `ArrayFieldItemTemplate`.
+By default, `ArraySchemaField` is not actually implemented in the `fields` list since `ArrayField` falls back to `SchemaField` if `ArraySchemaField` is not provided.
+If you want to customize how the individual items for an array are rendered, provide your implementation of `ArraySchemaField` as a `fields` override.
+
+```tsx
+import { RJSFSchema, UiSchema, FieldProps, RegistryFieldsType } from "@rjsf/utils";
+import validator from '@rjsf/validator-ajv8';
+
+const CustomArraySchemaField = function(props: FieldProps) {
+  const { index, registry } = props;
+  const { SchemaField } = registry.fields;
+  const name = `Index ${index}`;
+  return <SchemaField {...props} name={name} />;
+};
+
+const fields: RegistryFieldsType = {
+  ArraySchemaField: CustomArraySchemaField
+};
+
+const schema: RJSFSchema = {
+  type: "string"
+};
+
+render((
+  <Form schema={schema} validator={validator} fields={fields} />
+), document.getElementById("app"));
+```

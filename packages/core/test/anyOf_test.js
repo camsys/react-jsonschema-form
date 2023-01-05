@@ -85,9 +85,13 @@ describe("anyOf", () => {
       target: { value: $select.options[1].value },
     });
 
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: { foo: "defaultbar" },
-    });
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: { foo: "defaultbar" },
+      },
+      "root__anyof_select"
+    );
   });
 
   it("should assign a default value and set defaults on option change when using references", () => {
@@ -124,9 +128,13 @@ describe("anyOf", () => {
       target: { value: $select.options[1].value },
     });
 
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: { foo: "defaultbar" },
-    });
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: { foo: "defaultbar" },
+      },
+      "root__anyof_select"
+    );
   });
 
   it("should assign a default value and set defaults on option change with 'type': 'object' missing", () => {
@@ -158,9 +166,13 @@ describe("anyOf", () => {
       target: { value: $select.options[1].value },
     });
 
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: { foo: "defaultbar" },
-    });
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: { foo: "defaultbar" },
+      },
+      "root__anyof_select"
+    );
   });
 
   it("should render a custom widget", () => {
@@ -252,9 +264,13 @@ describe("anyOf", () => {
       target: { value: "Lorem ipsum dolor sit amet" },
     });
 
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: { foo: "Lorem ipsum dolor sit amet" },
-    });
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: { foo: "Lorem ipsum dolor sit amet" },
+      },
+      "root_foo"
+    );
   });
 
   it("should clear previous data when changing options", () => {
@@ -285,16 +301,30 @@ describe("anyOf", () => {
       target: { value: "Lorem ipsum dolor sit amet" },
     });
 
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: {
+          buzz: "Lorem ipsum dolor sit amet",
+        },
+      },
+      "root_buzz"
+    );
+
     Simulate.change(node.querySelector("input#root_foo"), {
       target: { value: "Consectetur adipiscing elit" },
     });
 
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: {
-        buzz: "Lorem ipsum dolor sit amet",
-        foo: "Consectetur adipiscing elit",
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: {
+          buzz: "Lorem ipsum dolor sit amet",
+          foo: "Consectetur adipiscing elit",
+        },
       },
-    });
+      "root_foo"
+    );
 
     const $select = node.querySelector("select");
 
@@ -335,9 +365,13 @@ describe("anyOf", () => {
       target: { value: 12345 },
     });
 
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: { userId: 12345 },
-    });
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: { userId: 12345 },
+      },
+      "root_userId"
+    );
 
     const $select = node.querySelector("select");
 
@@ -345,17 +379,25 @@ describe("anyOf", () => {
       target: { value: $select.options[1].value },
     });
 
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: { userId: undefined },
-    });
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: { userId: undefined },
+      },
+      "root_userId"
+    );
 
     Simulate.change(node.querySelector("input#root_userId"), {
       target: { value: "Lorem ipsum dolor sit amet" },
     });
 
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: { userId: "Lorem ipsum dolor sit amet" },
-    });
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: { userId: "Lorem ipsum dolor sit amet" },
+      },
+      "root_userId"
+    );
   });
 
   it("should support custom fields", () => {
@@ -810,7 +852,9 @@ describe("anyOf", () => {
 
       expect(node.querySelectorAll("select")).to.have.length.of(1);
 
-      expect(node.querySelectorAll("input#root_foo")).to.have.length.of(1);
+      expect(node.querySelectorAll("input#root_items_0_foo")).to.have.length.of(
+        1
+      );
     });
 
     it("should not change the selected option when switching order of items for anyOf inside array items", () => {
@@ -995,14 +1039,18 @@ describe("anyOf", () => {
         target: { value: $select.options[1].value },
       });
 
-      expect(node.querySelectorAll("input#root_foo")).to.have.length.of(1);
-      expect(node.querySelectorAll("input#root_bar")).to.have.length.of(1);
+      expect(node.querySelectorAll("input#root_items_0_foo")).to.have.length.of(
+        1
+      );
+      expect(node.querySelectorAll("input#root_items_0_bar")).to.have.length.of(
+        1
+      );
     });
 
     it("should correctly infer the selected option based on value", () => {
       const schema = {
-        $ref: "#/defs/any",
-        defs: {
+        $ref: "#/definitions/any",
+        definitions: {
           chain: {
             type: "object",
             title: "Chain",
@@ -1012,7 +1060,7 @@ describe("anyOf", () => {
               },
               components: {
                 type: "array",
-                items: { $ref: "#/defs/any" },
+                items: { $ref: "#/definitions/any" },
               },
             },
           },
@@ -1022,7 +1070,7 @@ describe("anyOf", () => {
             title: "Map",
             properties: {
               id: { enum: ["map"] },
-              fn: { $ref: "#/defs/any" },
+              fn: { $ref: "#/definitions/any" },
             },
           },
 
@@ -1041,15 +1089,15 @@ describe("anyOf", () => {
             properties: {
               id: { enum: ["transform"] },
               property_key: { type: "string" },
-              transformer: { $ref: "#/defs/any" },
+              transformer: { $ref: "#/definitions/any" },
             },
           },
           any: {
             anyOf: [
-              { $ref: "#/defs/chain" },
-              { $ref: "#/defs/map" },
-              { $ref: "#/defs/to_absolute" },
-              { $ref: "#/defs/transform" },
+              { $ref: "#/definitions/chain" },
+              { $ref: "#/definitions/map" },
+              { $ref: "#/definitions/to_absolute" },
+              { $ref: "#/definitions/transform" },
             ],
           },
         },
@@ -1075,13 +1123,133 @@ describe("anyOf", () => {
         },
       });
 
-      const idSelects = node.querySelectorAll("select#root_id");
+      const rootId = node.querySelector("select#root_id");
+      expect(rootId.value).eql("chain");
+      const componentId = node.querySelector("select#root_components_0_id");
+      expect(componentId.value).eql("map");
 
-      expect(idSelects).to.have.length(4);
-      expect(idSelects[0].value).eql("chain");
-      expect(idSelects[1].value).eql("map");
-      expect(idSelects[2].value).eql("transform");
-      expect(idSelects[3].value).eql("to_absolute");
+      const fnId = node.querySelector("select#root_components_0_fn_id");
+      expect(fnId.value).eql("transform");
+
+      const transformerId = node.querySelector(
+        "select#root_components_0_fn_transformer_id"
+      );
+      expect(transformerId.value).eql("to_absolute");
+    });
+  });
+  describe("hideError works with anyOf", () => {
+    const schema = {
+      type: "object",
+      properties: {
+        userId: {
+          anyOf: [
+            {
+              type: "number",
+            },
+            {
+              type: "string",
+            },
+          ],
+        },
+      },
+    };
+    function customValidate(formData, errors) {
+      errors.userId.addError("test");
+      return errors;
+    }
+
+    it("should show error on options with different types", () => {
+      const { node } = createFormComponent({
+        schema,
+        customValidate,
+      });
+
+      Simulate.change(node.querySelector("input#root_userId"), {
+        target: { value: 12345 },
+      });
+      Simulate.submit(node);
+
+      let inputs = node.querySelectorAll(
+        ".form-group.field-error input[type=number]"
+      );
+      expect(inputs[0].id).eql("root_userId");
+
+      const $select = node.querySelector("select");
+
+      Simulate.change($select, {
+        target: { value: $select.options[1].value },
+      });
+
+      Simulate.change(node.querySelector("input#root_userId"), {
+        target: { value: "Lorem ipsum dolor sit amet" },
+      });
+      Simulate.submit(node);
+
+      inputs = node.querySelectorAll(
+        ".form-group.field-error input[type=text]"
+      );
+      expect(inputs[0].id).eql("root_userId");
+    });
+    it("should NOT show error on options with different types when hideError: true", () => {
+      const { node } = createFormComponent({
+        schema,
+        uiSchema: {
+          "ui:hideError": true,
+        },
+        customValidate,
+      });
+
+      Simulate.change(node.querySelector("input#root_userId"), {
+        target: { value: 12345 },
+      });
+      Simulate.submit(node);
+
+      let inputs = node.querySelectorAll(
+        ".form-group.field-error input[type=number]"
+      );
+      expect(inputs).to.have.length.of(0);
+
+      const $select = node.querySelector("select");
+
+      Simulate.change($select, {
+        target: { value: $select.options[1].value },
+      });
+
+      Simulate.change(node.querySelector("input#root_userId"), {
+        target: { value: "Lorem ipsum dolor sit amet" },
+      });
+      Simulate.submit(node);
+
+      inputs = node.querySelectorAll(
+        ".form-group.field-error input[type=text]"
+      );
+      expect(inputs).to.have.length.of(0);
+    });
+  });
+
+  describe("Custom Field", function () {
+    const schema = {
+      anyOf: [
+        {
+          type: "number",
+        },
+        {
+          type: "string",
+        },
+      ],
+    };
+    const uiSchema = {
+      "ui:field": () => <div className="custom-field">Custom field</div>,
+    };
+    it("should be rendered once", function () {
+      const { node } = createFormComponent({ schema, uiSchema });
+      const fields = node.querySelectorAll(".custom-field");
+      expect(fields).to.have.length.of(1);
+    });
+    it("should not render <select>", function () {
+      const { node } = createFormComponent({ schema, uiSchema });
+      const selects = node.querySelectorAll("select");
+      expect(selects).to.have.length.of(0);
     });
   });
 });

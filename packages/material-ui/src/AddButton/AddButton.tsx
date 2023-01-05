@@ -1,14 +1,23 @@
-import React from 'react';
+import React from "react";
+import AddIcon from "@material-ui/icons/Add";
+import IconButton from "@material-ui/core/IconButton";
+import {
+  FormContextType,
+  IconButtonProps,
+  RJSFSchema,
+  StrictRJSFSchema,
+} from "@rjsf/utils";
 
-import { AddButtonProps } from '@rjsf/core';
-
-import Button from '@material-ui/core/Button';
-import AddIcon from '@material-ui/icons/Add';
-
-const AddButton: React.FC<AddButtonProps> = props => (
-  <Button {...props} color="secondary">
-    <AddIcon /> Add Item
-  </Button>
-);
-
-export default AddButton;
+/** The `AddButton` renders a button that represent the `Add` action on a form
+ */
+export default function AddButton<
+  T = any,
+  S extends StrictRJSFSchema = RJSFSchema,
+  F extends FormContextType = any
+>({ uiSchema, registry, ...props }: IconButtonProps<T, S, F>) {
+  return (
+    <IconButton title="Add Item" {...props} color="primary">
+      <AddIcon />
+    </IconButton>
+  );
+}

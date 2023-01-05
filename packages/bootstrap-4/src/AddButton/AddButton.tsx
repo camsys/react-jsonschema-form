@@ -1,12 +1,20 @@
 import React from "react";
-
-import { AddButtonProps } from "@rjsf/core";
+import { IconButtonProps } from "@rjsf/utils";
 import Button from "react-bootstrap/Button";
-import { BsPlus } from "react-icons/bs";
+import { BsPlus } from "@react-icons/all-files/bs/BsPlus";
 
-const AddButton: React.FC<AddButtonProps> = props => (
-  <Button {...props} color="primary" style={{width: "100%"}} className="ml-1">
-    <BsPlus/>
+const AddButton: React.ComponentType<IconButtonProps> = ({
+  uiSchema,
+  registry,
+  ...props
+}) => (
+  <Button
+    {...props}
+    style={{ width: "100%" }}
+    className={`ml-1 ${props.className}`}
+    title="Add Item"
+  >
+    <BsPlus />
   </Button>
 );
 

@@ -10,8 +10,11 @@ This library supports conditionally making fields required based on the presence
 
 In the following example the `billing_address` field will be required if `credit_card` is defined.
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   "type": "object",
 
   "properties": {
@@ -28,7 +31,7 @@ const schema = {
 };
 
 render((
-  <Form schema={schema} />
+  <Form schema={schema} validator={validator} />
 ), document.getElementById("app"));
 ```
 
@@ -37,8 +40,11 @@ render((
 In the following example the `billing_address` field will be required if `credit_card` is defined and the `credit_card`
 field will be required if `billing_address` is defined, making them both required if either is defined.
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   "type": "object",
 
   "properties": {
@@ -56,7 +62,7 @@ const schema = {
 };
 
 render((
-  <Form schema={schema} />
+  <Form schema={schema} validator={validator} />
 ), document.getElementById("app"));
 ```
 
@@ -68,8 +74,11 @@ This library also supports modifying portions of a schema based on form data.
 
 ### Conditional
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   "type": "object",
 
   "properties": {
@@ -90,7 +99,7 @@ const schema = {
 };
 
 render((
-  <Form schema={schema} />
+  <Form schema={schema} validator={validator} />
 ), document.getElementById("app"));
 ```
 
@@ -102,8 +111,11 @@ In this example the `billing_address` field will be displayed in the form if `cr
 
 The JSON Schema standard says that the dependency is triggered if the property is present. However, sometimes it's useful to have more sophisticated rules guiding the application of the dependency. For example, maybe you have three possible values for a field, and each one should lead to adding a different question. For this, we support a very restricted use of the `oneOf` keyword.
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   "title": "Person",
   "type": "object",
   "properties": {
@@ -168,7 +180,7 @@ const schema = {
 };
 
 render((
-  <Form schema={schema} />
+  <Form schema={schema} validator={validator} />
 ), document.getElementById("app"));
 ```
 

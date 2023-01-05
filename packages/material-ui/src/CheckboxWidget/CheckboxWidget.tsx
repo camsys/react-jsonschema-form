@@ -1,14 +1,24 @@
 import React from "react";
-
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
+import {
+  schemaRequiresTrueValue,
+  FormContextType,
+  RJSFSchema,
+  StrictRJSFSchema,
+  WidgetProps,
+} from "@rjsf/utils";
 
-import { WidgetProps } from "@rjsf/core";
-import { utils } from "@rjsf/core";
-
-const { schemaRequiresTrueValue } = utils;
-
-const CheckboxWidget = (props: WidgetProps) => {
+/** The `CheckBoxWidget` is a widget for rendering boolean properties.
+ *  It is typically used to represent a boolean.
+ *
+ * @param props - The `WidgetProps` for this component
+ */
+export default function CheckboxWidget<
+  T = any,
+  S extends StrictRJSFSchema = RJSFSchema,
+  F extends FormContextType = any
+>(props: WidgetProps<T, S, F>) {
   const {
     schema,
     id,
@@ -21,13 +31,12 @@ const CheckboxWidget = (props: WidgetProps) => {
     onBlur,
     onFocus,
   } = props;
-
   // Because an unchecked checkbox will cause html5 validation to fail, only add
   // the "required" attribute if the field value must be "true", due to the
   // "const" or "enum" keywords
-  const required = schemaRequiresTrueValue(schema);
+  const required = schemaRequiresTrueValue<S>(schema);
 
-  const _onChange = ({}, checked: boolean) => onChange(checked);
+  const _onChange = (_: any, checked: boolean) => onChange(checked);
   const _onBlur = ({
     target: { value },
   }: React.FocusEvent<HTMLButtonElement>) => onBlur(id, value);
@@ -40,7 +49,8 @@ const CheckboxWidget = (props: WidgetProps) => {
       control={
         <Checkbox
           id={id}
-          checked={typeof value === "undefined" ? false : value}
+          name={id}
+          checked={typeof value === "undefined" ? false : Boolean(value)}
           required={required}
           disabled={disabled || readonly}
           autoFocus={autofocus}
@@ -49,9 +59,7 @@ const CheckboxWidget = (props: WidgetProps) => {
           onFocus={_onFocus}
         />
       }
-      label={label}
+      label={label || ""}
     />
   );
-};
-
-export default CheckboxWidget;
+}

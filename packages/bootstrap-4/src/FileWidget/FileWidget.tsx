@@ -1,8 +1,14 @@
 import React from "react";
-import TextWidget, { TextWidgetProps } from "../TextWidget";
+import { getTemplate, WidgetProps } from "@rjsf/utils";
 
-const FileWidget = (props: TextWidgetProps) => {
-  return <TextWidget {...props} type="file"/>;
+const FileWidget = (props: WidgetProps) => {
+  const { options, registry } = props;
+  const BaseInputTemplate = getTemplate<"BaseInputTemplate">(
+    "BaseInputTemplate",
+    registry,
+    options
+  );
+  return <BaseInputTemplate {...props} type="file" />;
 };
 
 export default FileWidget;

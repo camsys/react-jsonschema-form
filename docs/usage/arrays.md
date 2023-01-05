@@ -6,8 +6,11 @@ Arrays are defined with a type equal to `array`, and array items' schemas are sp
 
 Arrays of a single field type can be specified as follows:
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   type: "array",
   items: {
     type: "string"
@@ -15,7 +18,7 @@ const schema = {
 };
 
 render((
-  <Form schema={schema} />
+  <Form schema={schema} validator={validator} />
 ), document.getElementById("app"));
 ```
 
@@ -23,8 +26,11 @@ render((
 
 Arrays of objects can be specified as follows:
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   type: "array",
   items: {
     type: "object",
@@ -37,7 +43,7 @@ const schema = {
 };
 
 render((
-  <Form schema={schema} />
+  <Form schema={schema} validator={validator} />
 ), document.getElementById("app"));
 ```
 
@@ -45,8 +51,11 @@ render((
 
 To specify a uiSchema that applies to array items, specify the uiSchema value within the `items` property:
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   type: "array",
   items: {
     type: "string"
@@ -60,7 +69,7 @@ const uiSchema = {
 };
 
 render((
-  <Form schema={schema} uiSchema={uiSchema} />
+  <Form schema={schema} uiSchema={uiSchema} validator={validator} />
 ), document.getElementById("app"));
 ```
 
@@ -68,8 +77,11 @@ render((
 
 The `additionalItems` keyword allows the user to add additional items of a given schema. For example:
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   type: "array",
   items: {
     type: "string"
@@ -80,32 +92,35 @@ const schema = {
 };
 
 render((
-  <Form schema={schema} />
+  <Form schema={schema} validator={validator} />
 ), document.getElementById("app"));
 ```
 
-## Array item options
+## Array item uiSchema options
 
 ### `orderable` option
 
 Array items are orderable by default, and react-jsonschema-form renders move up/down buttons alongside them. The uiSchema `orderable` options allows you to disable ordering:
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema, UiSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   type: "array",
   items: {
     type: "string"
   }
 };
 
-const uiSchema = {
+const uiSchema: UiSchema = {
   "ui:options":  {
     orderable: false
   }
 };
 
 render((
-  <Form schema={schema} uiSchema={uiSchema} />
+  <Form schema={schema} uiSchema={uiSchema} validator={validator} />
 ), document.getElementById("app"));
 ```
 
@@ -113,22 +128,25 @@ render((
 
 If either `items` or `additionalItems` contains a schema object, an add button for new items is shown by default. You can turn this off with the `addable` option in `uiSchema`:
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema, UiSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   type: "array",
   items: {
     type: "string"
   }
 };
 
-const uiSchema = {
+const uiSchema: UiSchema = {
   "ui:options":  {
     addable: false
   }
 };
 
 render((
-  <Form schema={schema} uiSchema={uiSchema} />
+  <Form schema={schema} uiSchema={uiSchema} validator={validator} />
 ), document.getElementById("app"));
 ```
 
@@ -136,22 +154,25 @@ render((
 
 A remove button is shown by default for an item if `items` contains a schema object, or the item is an `additionalItems` instance. You can turn this off with the `removable` option in `uiSchema`:
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema, UiSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   type: "array",
   items: {
     type: "string"
   }
 };
 
-const uiSchema = {
+const uiSchema: UiSchema = {
   "ui:options":  {
     removable: false
   }
 };
 
 render((
-  <Form schema={schema} uiSchema={uiSchema} />
+  <Form schema={schema} uiSchema={uiSchema} validator={validator} />
 ), document.getElementById("app"));
 ```
 
@@ -163,7 +184,10 @@ The default behavior for array fields is a list of text inputs with add/remove b
 Example:
 
 ```jsx
-const schema = {
+import { RJSFSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   type: "array",
   title: "A multiple-choice list",
   items: {
@@ -174,14 +198,17 @@ const schema = {
 };
 
 render((
-  <Form schema={schema} />
+  <Form schema={schema} validator={validator} />
 ), document.getElementById("app"));
 ```
 
 By default, this will render a multiple select box. If you prefer a list of checkboxes, just set the uiSchema `ui:widget` directive to `checkboxes` for that field:
 
-```js
-const schema = {
+```tsx
+import { RJSFSchema, UiSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   type: "array",
   title: "A multiple-choice list",
   items: {
@@ -191,15 +218,57 @@ const schema = {
   uniqueItems: true
 };
 
-const uiSchema = {
+const uiSchema: UiSchema = {
   "ui:widget": "checkboxes"
 };
 
 render((
-  <Form schema={schema} uiSchema={uiSchema} />
+  <Form schema={schema} uiSchema={uiSchema} validator={validator} />
 ), document.getElementById("app"));
 ```
 
+## Custom widgets
+
+In addition to [ArrayFieldTemplate](../advanced-customization/custom-templates.md#arrayfieldtemplate) you use your own widget by providing it to the uiSchema with the property of `ui:widget`. 
+
+Example: 
+
+```tsx
+import { RJSFSchema, UiSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const CustomSelectComponent = props => {
+  return (
+    <select>
+      {props.value.map((item, index) => (
+        <option key={index} id="custom-select">
+          {item}
+        </option>
+      ))}
+    </select>
+  );
+};
+
+const schema: RJSFSchema = {
+  type: "array",
+  title: "A multiple-choice list",
+  items: {
+    type: "string",
+  },
+};
+
+const uiSchema: UiSchema = {
+  "ui:widget": "CustomSelect"
+};
+
+const widgets = {
+  CustomSelect: CustomSelectComponent,
+};
+
+render((
+  <Form schema={schema} uiSchema={uiSchema} widgets={widgets} validator={validator} />
+), document.getElementById("app"));
+```
 
 ## Specifying the minimum or maximum number of items
 
@@ -207,8 +276,11 @@ Note that when an array property is marked as `required`, an empty array is cons
 
 Example:
 
-```jsx
-const schema = {
+```tsx
+import { RJSFSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   type: "array",
   minItems: 2,
   title: "A multiple-choice list",
@@ -220,7 +292,7 @@ const schema = {
 };
 
 render((
-  <Form schema={schema} />
+  <Form schema={schema} validator={validator} />
 ), document.getElementById("app"));
 ```
 
@@ -231,8 +303,11 @@ You can also specify the maximum number of items in an array using the `maxItems
 
 By default, checkboxes are stacked. If you prefer them inline, set the `inline` property to `true`:
 
-```js
-const schema = {
+```tsx
+import { RJSFSchema, UiSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+
+const schema: RJSFSchema = {
   type: "array",
   minItems: 2,
   title: "A multiple-choice list",
@@ -243,7 +318,7 @@ const schema = {
   uniqueItems: true
 };
 
-const uiSchema = {
+const uiSchema: UiSchema = {
   "ui:widget": "checkboxes",
   "ui:options": {
     inline: true
@@ -251,6 +326,6 @@ const uiSchema = {
 };
 
 render((
-  <Form schema={schema} uiSchema={uiSchema} />
+  <Form schema={schema} uiSchema={uiSchema} validator={validator} />
 ), document.getElementById("app"));
 ```

@@ -1,11 +1,14 @@
 import React from "react";
-
-import FormLabel from "@material-ui/core/FormLabel";
-import FormGroup from "@material-ui/core/FormGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
-
-import { WidgetProps } from "@rjsf/core";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormGroup from "@material-ui/core/FormGroup";
+import FormLabel from "@material-ui/core/FormLabel";
+import {
+  FormContextType,
+  WidgetProps,
+  RJSFSchema,
+  StrictRJSFSchema,
+} from "@rjsf/utils";
 
 const selectValue = (value: any, selected: any, all: any) => {
   const at = all.indexOf(value);
@@ -20,7 +23,16 @@ const deselectValue = (value: any, selected: any) => {
   return selected.filter((v: any) => v !== value);
 };
 
-const CheckboxesWidget = ({
+/** The `CheckboxesWidget` is a widget for rendering checkbox groups.
+ *  It is typically used to represent an array of enums.
+ *
+ * @param props - The `WidgetProps` for this component
+ */
+export default function CheckboxesWidget<
+  T = any,
+  S extends StrictRJSFSchema = RJSFSchema,
+  F extends FormContextType = any
+>({
   schema,
   label,
   id,
@@ -33,20 +45,20 @@ const CheckboxesWidget = ({
   onChange,
   onBlur,
   onFocus,
-}: WidgetProps) => {
+}: WidgetProps<T, S, F>) {
   const { enumOptions, enumDisabled, inline } = options;
 
-  const _onChange = (option: any) => ({
-    target: { checked },
-  }: React.ChangeEvent<HTMLInputElement>) => {
-    const all = (enumOptions as any).map(({ value }: any) => value);
+  const _onChange =
+    (option: any) =>
+    ({ target: { checked } }: React.ChangeEvent<HTMLInputElement>) => {
+      const all = (enumOptions as any).map(({ value }: any) => value);
 
-    if (checked) {
-      onChange(selectValue(option.value, value, all));
-    } else {
-      onChange(deselectValue(option.value, value));
-    }
-  };
+      if (checked) {
+        onChange(selectValue(option.value, value, all));
+      } else {
+        onChange(deselectValue(option.value, value));
+      }
+    };
 
   const _onBlur = ({
     target: { value },
@@ -60,33 +72,34 @@ const CheckboxesWidget = ({
       <FormLabel required={required} htmlFor={id}>
         {label || schema.title}
       </FormLabel>
-      <FormGroup row={!!inline}>
-        {(enumOptions as any).map((option: any, index: number) => {
-          const checked = value.indexOf(option.value) !== -1;
-          const itemDisabled =
-            enumDisabled && (enumDisabled as any).indexOf(option.value) != -1;
-          const checkbox = (
-            <Checkbox
-              id={`${id}_${index}`}
-              checked={checked}
-              disabled={disabled || itemDisabled || readonly}
-              autoFocus={autofocus && index === 0}
-              onChange={_onChange(option)}
-              onBlur={_onBlur}
-              onFocus={_onFocus}
-            />
-          );
-          return (
-            <FormControlLabel
-              control={checkbox}
-              key={index}
-              label={option.label}
-            />
-          );
-        })}
+      <FormGroup id={id} row={!!inline}>
+        {Array.isArray(enumOptions) &&
+          enumOptions.map((option, index: number) => {
+            const checked = value.indexOf(option.value) !== -1;
+            const itemDisabled =
+              Array.isArray(enumDisabled) &&
+              enumDisabled.indexOf(option.value) !== -1;
+            const checkbox = (
+              <Checkbox
+                id={`${id}-${option.value}`}
+                name={id}
+                checked={checked}
+                disabled={disabled || itemDisabled || readonly}
+                autoFocus={autofocus && index === 0}
+                onChange={_onChange(option)}
+                onBlur={_onBlur}
+                onFocus={_onFocus}
+              />
+            );
+            return (
+              <FormControlLabel
+                control={checkbox}
+                key={option.value}
+                label={option.label}
+              />
+            );
+          })}
       </FormGroup>
     </>
   );
-};
-
-export default CheckboxesWidget;
+}

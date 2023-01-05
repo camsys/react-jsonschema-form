@@ -1,6 +1,6 @@
 import React from "react";
 
-import { WidgetProps } from "@rjsf/core";
+import { WidgetProps } from "@rjsf/utils";
 import FormControl from "react-bootstrap/FormControl";
 import InputGroup from "react-bootstrap/InputGroup";
 
@@ -15,14 +15,11 @@ const TextareaWidget = ({
   required,
   disabled,
   autofocus,
-  label,
   readonly,
   onBlur,
   onFocus,
   onChange,
   options,
-  schema,
-  rawErrors = [],
 }: CustomWidgetProps) => {
   const _onChange = ({
     target: { value },
@@ -36,34 +33,23 @@ const TextareaWidget = ({
   }: React.FocusEvent<HTMLTextAreaElement>) => onFocus(id, value);
 
   return (
-    <>
-      <label htmlFor={id}>
-        {label || schema.title}
-        {required && (
-          <span
-            aria-hidden
-            className={rawErrors.length > 0 ? "text-danger ml-1" : "ml-1"}>
-            &thinsp;{"*"}
-          </span>
-        )}
-      </label>
-      <InputGroup>
-        <FormControl
-          id={id}
-          as="textarea"
-          placeholder={placeholder}
-          disabled={disabled}
-          readOnly={readonly}
-          value={value}
-          required={required}
-          autoFocus={autofocus}
-          rows={options.rows || 5}
-          onChange={_onChange}
-          onBlur={_onBlur}
-          onFocus={_onFocus}
-        />
-      </InputGroup>
-    </>
+    <InputGroup>
+      <FormControl
+        id={id}
+        name={id}
+        as="textarea"
+        placeholder={placeholder}
+        disabled={disabled}
+        readOnly={readonly}
+        value={value}
+        required={required}
+        autoFocus={autofocus}
+        rows={options.rows || 5}
+        onChange={_onChange}
+        onBlur={_onBlur}
+        onFocus={_onFocus}
+      />
+    </InputGroup>
   );
 };
 

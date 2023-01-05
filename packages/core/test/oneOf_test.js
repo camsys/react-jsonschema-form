@@ -4,6 +4,7 @@ import { Simulate } from "react-dom/test-utils";
 import sinon from "sinon";
 
 import { createFormComponent, createSandbox, setProps } from "./test_utils";
+import SchemaField from "../src/components/fields/SchemaField";
 
 describe("oneOf", () => {
   let sandbox;
@@ -86,9 +87,13 @@ describe("oneOf", () => {
       target: { value: $select.options[1].value },
     });
 
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: { foo: "defaultbar" },
-    });
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: { foo: "defaultbar" },
+      },
+      "root__oneof_select"
+    );
   });
 
   it("should assign a default value and set defaults on option change when using refs", () => {
@@ -124,9 +129,13 @@ describe("oneOf", () => {
       target: { value: $select.options[1].value },
     });
 
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: { foo: "defaultbar" },
-    });
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: { foo: "defaultbar" },
+      },
+      "root__oneof_select"
+    );
   });
 
   it("should assign a default value and set defaults on option change with 'type': 'object' missing", () => {
@@ -158,9 +167,13 @@ describe("oneOf", () => {
       target: { value: $select.options[1].value },
     });
 
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: { foo: "defaultbar" },
-    });
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: { foo: "defaultbar" },
+      },
+      "root__oneof_select"
+    );
   });
 
   it("should render a custom widget", () => {
@@ -252,9 +265,13 @@ describe("oneOf", () => {
       target: { value: "Lorem ipsum dolor sit amet" },
     });
 
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: { foo: "Lorem ipsum dolor sit amet" },
-    });
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: { foo: "Lorem ipsum dolor sit amet" },
+      },
+      "root_foo"
+    );
   });
 
   it("should clear previous data when changing options", () => {
@@ -285,16 +302,30 @@ describe("oneOf", () => {
       target: { value: "Lorem ipsum dolor sit amet" },
     });
 
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: {
+          buzz: "Lorem ipsum dolor sit amet",
+        },
+      },
+      "root_buzz"
+    );
+
     Simulate.change(node.querySelector("input#root_foo"), {
       target: { value: "Consectetur adipiscing elit" },
     });
 
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: {
-        buzz: "Lorem ipsum dolor sit amet",
-        foo: "Consectetur adipiscing elit",
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: {
+          buzz: "Lorem ipsum dolor sit amet",
+          foo: "Consectetur adipiscing elit",
+        },
       },
-    });
+      "root_foo"
+    );
 
     const $select = node.querySelector("select");
 
@@ -335,11 +366,15 @@ describe("oneOf", () => {
       target: { value: 12345 },
     });
 
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: {
-        userId: 12345,
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: {
+          userId: 12345,
+        },
       },
-    });
+      "root_userId"
+    );
 
     const $select = node.querySelector("select");
 
@@ -347,20 +382,28 @@ describe("oneOf", () => {
       target: { value: $select.options[1].value },
     });
 
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: {
-        userId: undefined,
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: {
+          userId: undefined,
+        },
       },
-    });
+      "root_userId"
+    );
 
     Simulate.change(node.querySelector("input#root_userId"), {
       target: { value: "Lorem ipsum dolor sit amet" },
     });
-    sinon.assert.calledWithMatch(onChange.lastCall, {
-      formData: {
-        userId: "Lorem ipsum dolor sit amet",
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: {
+          userId: "Lorem ipsum dolor sit amet",
+        },
       },
-    });
+      "root_userId"
+    );
   });
 
   it("should support custom fields", () => {
@@ -392,6 +435,46 @@ describe("oneOf", () => {
     });
 
     expect(node.querySelectorAll("#custom-oneof-field")).to.have.length(1);
+  });
+
+  it("should pass form context to schema field", () => {
+    const schema = {
+      type: "object",
+      properties: {
+        userId: {
+          oneOf: [
+            {
+              type: "number",
+            },
+            {
+              type: "string",
+            },
+          ],
+        },
+      },
+    };
+    const formContext = { root: "root-id", root_userId: "userId-id" };
+    function CustomSchemaField(props) {
+      const { formContext, idSchema } = props;
+      return (
+        <>
+          <code id={formContext[idSchema.$id]}>Ha</code>
+          <SchemaField {...props} />
+        </>
+      );
+    }
+    const { node } = createFormComponent({
+      schema,
+      formData: { userId: "foobarbaz" },
+      formContext,
+      fields: { SchemaField: CustomSchemaField },
+    });
+
+    const codeBlocks = node.querySelectorAll("code");
+    expect(codeBlocks).to.have.length(3);
+    Object.keys(formContext).forEach((key) => {
+      expect(node.querySelector(`code#${formContext[key]}`)).to.exist;
+    });
   });
 
   it("should select the correct field when the form is rendered from existing data", () => {
@@ -494,7 +577,7 @@ describe("oneOf", () => {
 
     expect($select.value).eql("1");
 
-    Simulate.change(node.querySelector("input#root_bar"), {
+    Simulate.change(node.querySelector("input#root_items_bar"), {
       target: { value: "Lorem ipsum dolor sit amet" },
     });
 
@@ -541,6 +624,47 @@ describe("oneOf", () => {
     expect(node.querySelector("input#root").value).eql("");
   });
 
+  it("should use only the selected option when generating default values", () => {
+    const schema = {
+      type: "object",
+      oneOf: [
+        {
+          additionalProperties: false,
+          properties: { lorem: { type: "object" } },
+        },
+        {
+          additionalProperties: false,
+          properties: { ipsum: { type: "object" } },
+        },
+        {
+          additionalProperties: false,
+          properties: { pyot: { type: "object" } },
+        },
+      ],
+    };
+
+    const { node, onChange } = createFormComponent({
+      schema,
+      formData: { lorem: {} },
+    });
+
+    const $select = node.querySelector("select");
+
+    Simulate.change($select, {
+      target: { value: $select.options[1].value },
+    });
+
+    expect($select.value).eql("1");
+
+    sinon.assert.calledWithMatch(
+      onChange.lastCall,
+      {
+        formData: { ipsum: {} },
+      },
+      "root__oneof_select"
+    );
+  });
+
   describe("Arrays", () => {
     it("should correctly render mixed types for oneOf inside array items", () => {
       const schema = {
@@ -584,8 +708,12 @@ describe("oneOf", () => {
         target: { value: $select.options[1].value },
       });
 
-      expect(node.querySelectorAll("input#root_foo")).to.have.length.of(1);
-      expect(node.querySelectorAll("input#root_bar")).to.have.length.of(1);
+      expect(node.querySelectorAll("input#root_items_0_foo")).to.have.length.of(
+        1
+      );
+      expect(node.querySelectorAll("input#root_items_0_bar")).to.have.length.of(
+        1
+      );
     });
   });
 
@@ -693,8 +821,8 @@ describe("oneOf", () => {
 
   it("should correctly infer the selected option based on value", () => {
     const schema = {
-      $ref: "#/defs/any",
-      defs: {
+      $ref: "#/definitions/any",
+      definitions: {
         chain: {
           type: "object",
           title: "Chain",
@@ -704,7 +832,7 @@ describe("oneOf", () => {
             },
             components: {
               type: "array",
-              items: { $ref: "#/defs/any" },
+              items: { $ref: "#/definitions/any" },
             },
           },
         },
@@ -714,7 +842,7 @@ describe("oneOf", () => {
           title: "Map",
           properties: {
             id: { enum: ["map"] },
-            fn: { $ref: "#/defs/any" },
+            fn: { $ref: "#/definitions/any" },
           },
         },
 
@@ -733,15 +861,15 @@ describe("oneOf", () => {
           properties: {
             id: { enum: ["transform"] },
             property_key: { type: "string" },
-            transformer: { $ref: "#/defs/any" },
+            transformer: { $ref: "#/definitions/any" },
           },
         },
         any: {
           oneOf: [
-            { $ref: "#/defs/chain" },
-            { $ref: "#/defs/map" },
-            { $ref: "#/defs/to_absolute" },
-            { $ref: "#/defs/transform" },
+            { $ref: "#/definitions/chain" },
+            { $ref: "#/definitions/map" },
+            { $ref: "#/definitions/to_absolute" },
+            { $ref: "#/definitions/transform" },
           ],
         },
       },
@@ -767,12 +895,43 @@ describe("oneOf", () => {
       },
     });
 
-    const idSelects = node.querySelectorAll("select#root_id");
+    const rootId = node.querySelector("select#root_id");
+    expect(rootId.value).eql("chain");
+    const componentId = node.querySelector("select#root_components_0_id");
+    expect(componentId.value).eql("map");
 
-    expect(idSelects).to.have.length(4);
-    expect(idSelects[0].value).eql("chain");
-    expect(idSelects[1].value).eql("map");
-    expect(idSelects[2].value).eql("transform");
-    expect(idSelects[3].value).eql("to_absolute");
+    const fnId = node.querySelector("select#root_components_0_fn_id");
+    expect(fnId.value).eql("transform");
+
+    const transformerId = node.querySelector(
+      "select#root_components_0_fn_transformer_id"
+    );
+    expect(transformerId.value).eql("to_absolute");
+  });
+
+  describe("Custom Field", function () {
+    const schema = {
+      anyOf: [
+        {
+          type: "number",
+        },
+        {
+          type: "string",
+        },
+      ],
+    };
+    const uiSchema = {
+      "ui:field": () => <div className="custom-field">Custom field</div>,
+    };
+    it("should be rendered once", function () {
+      const { node } = createFormComponent({ schema, uiSchema });
+      const fields = node.querySelectorAll(".custom-field");
+      expect(fields).to.have.length.of(1);
+    });
+    it("should not render <select>", function () {
+      const { node } = createFormComponent({ schema, uiSchema });
+      const selects = node.querySelectorAll("select");
+      expect(selects).to.have.length.of(0);
+    });
   });
 });

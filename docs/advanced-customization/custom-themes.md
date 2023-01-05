@@ -1,31 +1,41 @@
 # Custom Themes
 
-The `withTheme` component provides an easy way to extend the functionality of react-jsonschema-form by passing in a theme object that defines custom/overridden widgets and fields, as well as any of the other possible properties of the standard rjsf `Form` component. This theme-defining object is passed as the only parameter to the HOC (`withTheme(ThemeObj)`), and the HOC will return a themed-component which you use instead of the standard `Form` component.
+The `withTheme` component provides an easy way to extend the functionality of react-jsonschema-form by passing in a theme object that defines custom/overridden widgets and fields, as well as any of the other possible properties of the standard rjsf `Form` component.
+This theme-defining object is passed as the only parameter to the HOC (`withTheme(ThemeObj)`), and the HOC will return a themed-component which you use instead of the standard `Form` component.
 
 ## Usage
 
-```jsx
+```tsx
 import React, { Component } from 'react';
-import { withTheme } from '@rjsf/core';
+import validator from '@rjsf/validator-ajv8';
+import { withTheme, ThemeProps } from '@rjsf/core';
 
-const theme = { widgets: {test: () => (<div>test</div>) } };
+const theme: ThemeProps = { widgets: {test: () => (<div>test</div>) } };
 
 const ThemedForm = withTheme(theme); 
 
 const Demo = () => (
-  <ThemedForm schema={schema} uiSchema={uiSchema} />
+  <ThemedForm schema={schema} uiSchema={uiSchema} validator={validator} />
 );
 ```
 
 ## Theme object properties
-The Theme object consists of the same properties as the rjsf `Form` component (such as **widgets** and **fields**). The themed-Form component merges together any theme-specific **widgets** and **fields** with the default **widgets** and **fields**. For instance, providing a single widget in **widgets** will merge this widget with all the default widgets of the rjsf `Form` component, but overrides the default if the theme's widget's name matches the default widget's name. Thus, for each default widget or field not specified/overridden, the themed-form will rely on the defaults from the rjsf `Form`. Note that you are not required to pass in either custom **widgets** or **fields** when using the custom-themed HOC component; you can make the essentially redefine the default Form by simply doing `const Form = withTheme({});`.
+The Theme object consists of the same properties as the rjsf `Form` component (such as **widgets**, **fields** and **templates**).
+The themed-Form component merges together any theme-specific **widgets**, **fields** and **templates** with the default **widgets**, **fields** and **templates**.
+For instance, providing a single widget in **widgets** will merge this widget with all the default widgets of the rjsf `Form` component, but overrides the default if the theme's widget's name matches the default widget's name.
+Thus, for each default widget or field not specified/overridden, the themed-form will rely on the defaults from the rjsf `Form`.
+Note that you are not required to pass in either custom **widgets**, **fields** or **templates** when using the custom-themed HOC component;
+you can essentially redefine the default Form by simply doing `const Form = withTheme({});`.
 
 ### Widgets and fields 
 **widgets** and **fields** should be in the same format as shown [here](/advanced-customization/#custom-widgets-and-fields).
 
 Example theme with custom widget:
-```jsx
-const MyCustomWidget = (props) => {
+```tsx
+import { WidgetProps, RegistryWidgetsType } from "@rjsf/utils";
+import { ThemeProps } from "@rjsf/core";
+
+const MyCustomWidget = (props: WidgetProps) => {
   return (
     <input type="text"
       className="custom"
@@ -35,20 +45,23 @@ const MyCustomWidget = (props) => {
   );
 };
 
-const myWidgets = {
+const myWidgets: RegistryWidgetsType = {
   myCustomWidget: MyCustomWidget
 };
 
-const ThemeObject = {widgets: myWidgets};
+const ThemeObject: ThemeProps = { widgets: myWidgets };
 export default ThemeObject;
 ```
 
-The above can be similarly done for **fields**.
+The above can be similarly done for **fields** and **templates**.
 
 ### Templates
-Each template should be passed directly into the theme object just as you would into the rjsf Form component. Here is an example of how to use a custom [ArrayFieldTemplate](/advanced-customization/#array-field-template) and [ErrorListTemplate](/advanced-customization/#error-list-template) in the theme object:
-```jsx
-function MyArrayFieldTemplate(props) {
+Each template should be passed into the theme object via the **templates** object just as you would into the rjsf Form component. Here is an example of how to use a custom [ArrayFieldTemplate](/advanced-customization/#array-field-template) and [ErrorListTemplate](/advanced-customization/#error-list-template) in the theme object:
+```tsx
+import { ArrayFieldTemplateProps, ErrorListProps } from "@rjsf/utils";
+import { ThemeProps } from "@rjsf/core";
+
+function MyArrayFieldTemplate(props: ArrayFieldTemplateProps) {
   return (
     <div>
       {props.items.map(element => element.children)}
@@ -57,7 +70,7 @@ function MyArrayFieldTemplate(props) {
   );
 }
 
-function MyErrorListTemplate(props) {
+function MyErrorListTemplate(props: ErrorListProps) {
   const {errors} = props;
   return (
     <ul>
@@ -70,9 +83,11 @@ function MyErrorListTemplate(props) {
   );
 }
 
-const ThemeObject = {
-    ArrayFieldTemplate: MyArrayFieldTemplate, 
-    ErrorList: MyErrorListTemplate,
+const ThemeObject: ThemeProps = {
+    templates: {
+      ArrayFieldTemplate: MyArrayFieldTemplate,
+      ErrorListTemplate: MyErrorListTemplate,
+    },
     widgets: myWidgets
 };
 
@@ -80,10 +95,14 @@ export default ThemeObject;
 ```
 
 ## Overriding other Form props
-Just as the theme can override **widgets**, **fields**, any of the field templates, and set default values to properties like **showErrorList**, you can do the same with the instance of the withTheme() Form component.
-```jsx
-const ThemeObject = {
-    ArrayFieldTemplate: MyArrayFieldTemplate, 
+Just as the theme can override **widgets**, **fields**, any of the **templates**, and set default values to properties like **showErrorList**, you can do the same with the instance of the withTheme() Form component.
+```tsx
+import { ThemeProps } from "@rjsf/core";
+
+const ThemeObject: ThemeProps = {
+    templates: {
+      ArrayFieldTemplate: MyArrayFieldTemplate,
+    },
     fields: myFields,
     showErrorList: false,
     widgets: myWidgets

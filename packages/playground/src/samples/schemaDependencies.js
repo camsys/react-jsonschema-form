@@ -1,12 +1,11 @@
-module.exports = {
+export default {
   schema: {
     title: "Schema dependencies",
     description: "These samples are best viewed without live validation.",
     type: "object",
     properties: {
       simple: {
-        src:
-          "https://spacetelescope.github.io/understanding-json-schema/reference/object.html#dependencies",
+        src: "https://spacetelescope.github.io/understanding-json-schema/reference/object.html#dependencies",
         title: "Simple",
         type: "object",
         properties: {

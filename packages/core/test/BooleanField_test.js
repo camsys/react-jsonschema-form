@@ -12,6 +12,7 @@ describe("BooleanField", () => {
 
   beforeEach(() => {
     sandbox = createSandbox();
+    sandbox.stub(console, "warn");
   });
 
   afterEach(() => {
@@ -184,14 +185,46 @@ describe("BooleanField", () => {
     expect(description.textContent).eql("my description");
   });
 
+  it("should pass uiSchema to custom widget", () => {
+    const CustomCheckboxWidget = ({ uiSchema }) => {
+      return (
+        <div id="custom-ui-option-value">
+          {uiSchema.custom_field_key["ui:options"].test}
+        </div>
+      );
+    };
+
+    const { node } = createFormComponent({
+      schema: {
+        type: "boolean",
+        description: "my description",
+      },
+      widgets: {
+        CheckboxWidget: CustomCheckboxWidget,
+      },
+      uiSchema: {
+        custom_field_key: {
+          "ui:widget": "checkbox",
+          "ui:options": {
+            test: "foo",
+          },
+        },
+      },
+    });
+
+    expect(node.querySelector("#custom-ui-option-value").textContent).to.eql(
+      "foo"
+    );
+  });
+
   it("should render the description using provided description field", () => {
     const { node } = createFormComponent({
       schema: {
         type: "boolean",
         description: "my description",
       },
-      fields: {
-        DescriptionField: ({ description }) => (
+      templates: {
+        DescriptionFieldTemplate: ({ description }) => (
           <div className="field-description">{description} overridden</div>
         ),
       },
@@ -234,7 +267,7 @@ describe("BooleanField", () => {
     Simulate.change(node.querySelector("input"), {
       target: { checked: true },
     });
-    sinon.assert.calledWithMatch(onChange.lastCall, { formData: true });
+    sinon.assert.calledWithMatch(onChange.lastCall, { formData: true }, "root");
   });
 
   it("should fill field with data", () => {
@@ -270,7 +303,7 @@ describe("BooleanField", () => {
 
     const labels = [].map.call(
       node.querySelectorAll(".field-radio-group label"),
-      label => label.textContent
+      (label) => label.textContent
     );
     expect(labels).eql(["Yes", "No"]);
   });
@@ -287,7 +320,7 @@ describe("BooleanField", () => {
 
     const labels = [].map.call(
       node.querySelectorAll(".field-radio-group label"),
-      label => label.textContent
+      (label) => label.textContent
     );
     expect(labels).eql(["No", "Yes"]);
   });
@@ -304,9 +337,11 @@ describe("BooleanField", () => {
 
     const labels = [].map.call(
       node.querySelectorAll(".field-radio-group label"),
-      label => label.textContent
+      (label) => label.textContent
     );
     expect(labels).eql(["Yes", "No"]);
+    expect(console.warn.calledWithMatch(/The enumNames property is deprecated/))
+      .to.be.true;
   });
 
   it("should support oneOf titles for radio widgets", () => {
@@ -330,7 +365,7 @@ describe("BooleanField", () => {
 
     const labels = [].map.call(
       node.querySelectorAll(".field-radio-group label"),
-      label => label.textContent
+      (label) => label.textContent
     );
     expect(labels).eql(["Yes", "No"]);
   });
@@ -356,7 +391,7 @@ describe("BooleanField", () => {
 
     const labels = [].map.call(
       node.querySelectorAll(".field-radio-group label"),
-      label => label.textContent
+      (label) => label.textContent
     );
     expect(labels).eql(["No", "Yes"]);
   });
@@ -432,9 +467,11 @@ describe("BooleanField", () => {
 
     const labels = [].map.call(
       node.querySelectorAll(".field option"),
-      label => label.textContent
+      (label) => label.textContent
     );
     expect(labels).eql(["", "Yes", "No"]);
+    expect(console.warn.calledWithMatch(/The enumNames property is deprecated/))
+      .to.be.true;
   });
 
   it("should handle a focus event with checkbox", () => {
@@ -549,7 +586,7 @@ describe("BooleanField", () => {
   });
 
   describe("Label", () => {
-    const Widget = props => <div id={`label-${props.label}`} />;
+    const Widget = (props) => <div id={`label-${props.label}`} />;
 
     const widgets = { Widget };
 
@@ -627,6 +664,7 @@ describe("BooleanField", () => {
       });
       expect($select.value).eql("true");
       expect(spy.lastCall.args[0].formData).eql(true);
+      expect(spy.lastCall.args[1]).eql("root");
     });
 
     it("should render a string field with a label", () => {
@@ -663,9 +701,13 @@ describe("BooleanField", () => {
         target: { value: "false" },
       });
 
-      sinon.assert.calledWithMatch(onChange.lastCall, {
-        formData: false,
-      });
+      sinon.assert.calledWithMatch(
+        onChange.lastCall,
+        {
+          formData: false,
+        },
+        "root"
+      );
     });
 
     it("should render the widget with the expected id", () => {
